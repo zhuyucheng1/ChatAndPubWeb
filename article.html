@@ -1,0 +1,62 @@
+<div class="articles">
+  <div class="ajax-load-box posts-con" id="apps">
+
+
+  </div>
+
+  <div id="ajax-load-posts">
+    <button id="fa-loadmore" class="button button-more wow fadeInUp" data-wow-delay="0.3s" data-home="true"
+            data-paged="2" data-action="fa_load_postlist" data-total="4">加载更多
+    </button>
+  </div>
+
+</div>
+</div>
+
+<style>
+  .title {
+    font-size: 18px;
+    color: #282828;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .lol li {
+    display: inline-block;
+  }
+
+  .clearfix:after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+
+
+</style>
+<div class="detail" style="display: none;">
+
+  <div class="c">
+    <div style="display: block;width: 300px;margin: auto">
+      <h1 class="title"></h1>
+      <ul class="lol">
+        <li class="ico-cat"><i class="icon-list-2"></i> <a href="#" class="author"></a></li>
+        <li class="ico-time"><i class="icon-clock-1"></i><span class="create"></span></li>
+        <li class="ico-eye hidden-xs"><i class="icon-eye-4"></i> <span class="read"></span></li>
+        <li class="ico-like hidden-xs"><i class="icon-heart"></i><span class="like"></span></li>
+      </ul>
+    </div>
+    <div class="content" style="padding: 5px;">
+
+    </div>
+    <div class="replies"></div>
+
+  </div>
+  <script id="reply" type="text/plain" style="width:700px;height:300px;"></script>
+  <div id="ajax-load-posts">
+    <button id="back" class="button button-more wow fadeInUp" data-wow-delay="0.3s" data-home="true"
+            data-paged="2" data-action="fa_load_postlist" data-total="4">返回
+    </button>
+  </div>
+</div>
+
