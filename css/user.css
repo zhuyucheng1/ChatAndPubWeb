@@ -1,0 +1,43 @@
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+hr {
+    margin-top: 2px;
+    margin-bottom: 0px;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+.input-group[class*=col-] {
+    float: left;
+    padding-right: 5px;
+    padding-left: 0;
+    margin-top: 5px;
+}
+
+.clear {
+    clear: both;
+}
+
+.panel {
+    margin-bottom: 5px;
+}
+
+.search {
+    margin-bottom: -10px;
+    margin-left: 10px;
+    background-color: white;
+    color: gray;
+}
+
+.search-btn {
+    position: absolute;
+    right: 0px;
+    bottom: 15px;
+}
+
+.search-body {
+    position: relative;
+}
