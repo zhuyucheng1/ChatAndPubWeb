@@ -31,7 +31,8 @@
         UEDITOR_HOME_URL: URL
 
         // 服务器统一请求接口路径
-        , serverUrl:"http://118.25.59.30:8080/web/ueditor/exec"
+      , serverUrl:"http://118.25.59.30:8080/web/ueditor/exec"
+        // , serverUrl:"http://localhost:8080/web/ueditor/exec"
         //,serverUrl: URL + "jsp/controller.jsp"
         //工具栏上的所有的功能按钮和下拉框，可以在new编辑器的实例时选择自己需要的从新定义
         , toolbars: [[

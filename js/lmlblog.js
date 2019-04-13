@@ -1,3 +1,7 @@
+// var sysUrl = "http://localhost:8080";
+var sysUrl = "http://118.25.59.30:8080";
+//用来标志读取的wenzhang
+var lookId ="";
 function clearButterbar() {
     if (jQuery(".butterBar").length > 0) {
         jQuery(".butterBar").remove();
@@ -423,24 +427,7 @@ function myAjax(options) {
     }
   }
 }
-function getLoginUser() {
-  myAjax({
-    url:"http://118.25.59.30:8080/getLoginUser",
-    dataType:'json',
-    success:function(res){
-      // console.log(res)
-      var d = JSON.parse(res);
-      // console.log(d.data.head);
-      if(d.data.head){
-        jQuery(".login").show();
-        jQuery(".nologin").hide();
-        jQuery(".login img").get(0).src = d.data.head;
-        jQuery(".login span").text(d.data.name+"，欢迎你!");
-      }
-    }
-  })
-}
-getLoginUser();
+
 //格式化参数
 function formatParams(data) {
   var arr = [];
@@ -708,7 +695,7 @@ setInterval("myInterval()",5000);//1000为1秒钟
 function myInterval()
 {
   myAjax({
-    url:'http://118.25.59.30:8080/getNoLook',
+    url:sysUrl+'/getNoLook',
     dataType:'json',
     success:function(res){
       // console.log(data);
@@ -729,6 +716,9 @@ function myInterval()
     }
   })
 }
+
+
+
 var ueditor = "";
 var pageSize=6;
 var pageIndex=0;
@@ -738,115 +728,279 @@ var vue = new Vue({
     article:'',
     articles:'',
     top:'',
-    recent:''
+    recent:'',
+    newArticles:'',
+    readArticles:'',
+    repArticles:'',
   },
   methods: {
     init:function(){
        go_Back();
       this.getAll();
+      this.getNew();
+      this.getRead();
+      this.getTop5();
+
       jQuery(document).on("click", "#fa-loadmore", function($) {
         var _self = jQuery(this),
           _postlistWrap = jQuery('.posts-con'),
-          _button = jQuery('#fa-loadmore'),
+
           _data = _self.data();
-        _button.html('..加载中')
+
           vue.getAll();
-          _button.html('加载更多')
+
       });
       jQuery(document).on('click','.ajax-load-con',function(){
         var id = this.id;
-        var data={
-          repId:vue.articles[id].id,
-          type:1
-        };
-        myAjax({
-          url:"http://118.25.59.30:8080/getReplys",
-          type:'post',
-          data:JSON.stringify(data),
-          success:function(res){
-            console.log(res);
-            var d = JSON.parse(res);
-            var html="";
-            for(var i =0;i<d.data.length;i++){
-              html+='<div class="reply clearfix" >\n' +
-                '      <div class="con">'+d.data[i].content+'</div>\n' +
-                '      <div class="bottoms">\n' +
-                '        <div class="rep_stu" style="float: left">\n' +
-                '          <img class="rep_head" src="'+d.data[i].student.head+'" style="width: 50px;height: 50px;border-radius: 50%"><span\n' +
-                '          class="rep_name">'+d.data[i].student.name+'</span>\n' +
-                '        </div>\n' +
-                '        <div class="time" style="float: right;line-height: 50px;">\n' +
-                '          <span class="c_t">'+d.data[i].createTime+'</span>\n' +
-                '          <span class="floor" style="padding-left: 20px">'+(i+1)+'楼</span>\n' +
-                '        </div>\n' +
-                '      </div>\n' +
-                '\n' +
-                '    </div>'
-            }
-            jQuery(".replies").html(html);
-          }
-
-        });
-
-        jQuery(".articles").hide();
-        jQuery(".detail .title").text(vue.articles[id].title);
-        jQuery(".detail .author").text(vue.articles[id].authorName);
-        jQuery(".detail .create").text(vue.articles[id].createTime);
-        jQuery(".detail .read").text(vue.articles[id].read);
-        jQuery(".detail .like").text(vue.articles[id].like);
-        jQuery(".detail .content").html(vue.articles[id].content);
-        // jQuery(".detail .abs").text(vue.articles[id].abs);
-        // document.documentElement.scrollTop=600;
-        var timer=setInterval(function(){
-          var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
-          var ispeed=Math.floor(-scrollTop/6);
-          console.log(ispeed)
-          if(scrollTop<=600){
-            clearInterval(timer);
-          }
-          document.documentElement.scrollTop=document.body.scrollTop=scrollTop+ispeed;
-        },30);
-        jQuery(".detail").show();
+       vue.getSeeDe(vue.articles[id]);
       });
-      jQuery(document).on('click','#back',function(){
+      jQuery(document).on('click','.widget_suxingme_topic',function(){
         var id = this.id;
-        jQuery(".articles").show();
-        jQuery(".detail").hide();
-        var timer=setInterval(function(){
-          var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
-          var ispeed=Math.floor(-scrollTop/6);
-          console.log(ispeed)
-          if(scrollTop<=600){
-            clearInterval(timer);
-          }
-          document.documentElement.scrollTop=document.body.scrollTop=scrollTop+ispeed;
-        },30);
+        // console.log(id);
+        vue.getSeeDe(vue.readArticles[id]);
+      });
+      jQuery(document).on('click','.rr',function(){
+        var id = this.id;
+        // console.log(vue.newArticles[id]);
+        vue.getSeeDe(vue.newArticles[id]);
+      });
+      jQuery(document).on('click','.tt',function(){
+        var id = this.id;
+        // console.log(vue.newArticles[id]);
+        vue.getSeeDe(vue.repArticles[id]);
+      })
+      jQuery(document).on('click','#back',function(){
+          jQuery(".articles").show();
+          jQuery(".detail").hide();
+          var timer=setInterval(function(){
+            var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+            var ispeed=Math.floor(-scrollTop/6);
+            console.log(ispeed)
+            if(scrollTop<=600) {
+              clearInterval(timer);
+            }
+        });
       });
 
 
     },
+    getReplies:function(id){
+      var data = {
+        repId: id,
+        type: 1
+      };
+      myAjax({
+        url: sysUrl + "/getReplys",
+        type: 'post',
+        data: JSON.stringify(data),
+        success: function (res) {
+          function getLoginUser() {
+            myAjax({
+              url:sysUrl+"/getLoginUser",
+              dataType:'json',
+              success:function(res){
+                // console.log(res)
+                var d = JSON.parse(res);
+                // console.log(d.data.head);
+                jQuery(".myRep").hide();
+                if(d.data.head){
+                  jQuery(".login").show();
+                  jQuery(".nologin").hide();
+                  jQuery(".login img").get(0).src = d.data.head;
+                  jQuery(".login span").text(d.data.name+"，欢迎你!");
+                  jQuery(".myRep").show();
+
+                }
+              }
+            })
+          }
+          getLoginUser();
+          console.log(res);
+          var d = JSON.parse(res);
+          var html = "";
+          jQuery(".replies").html(html);
+          for (var i = 0; i < d.data.length; i++) {
+            html += '<div class="reply clearfix" >\n' +
+              '      <div class="con">' + d.data[i].content + '</div>\n' +
+              '      <div class="bottoms">\n' +
+              '        <div class="rep_stu" style="float: left">\n' +
+              '          <img class="rep_head" src="' + d.data[i].student.head + '" style="width: 50px;height: 50px;border-radius: 50%"><span\n' +
+              '          class="rep_name">' + d.data[i].student.name + '</span>\n' +
+              '        </div>\n' +
+              '        <div class="time" style="float: right;line-height: 50px;">\n' +
+              '          <span class="c_t">' + d.data[i].createTime + '</span>\n' +
+              '          <span class="floor" style="padding-left: 20px">' + (i + 1) + '楼</span>\n' +
+              '        </div>\n' +
+              '      </div>\n' +
+              '\n' +
+              '    </div>'
+          }
+          jQuery(".replies").html(html);
+        }
+
+      });
+    },
+    getSeeDe: function (article) {
+      lookId = article.id;
+
+
+      vue.getReplies(lookId);
+      jQuery(".articles").hide();
+      jQuery(".detail .title").text(article.title);
+      jQuery(".detail .author").text(article.authorName);
+      jQuery(".detail .create").text(article.createTime);
+      jQuery(".detail .read").text(article.read);
+      jQuery(".detail .like").text(article.like);
+      jQuery(".detail .content").html(article.content);
+      // jQuery(".detail .abs").text(article.abs);
+      // document.documentElement.scrollTop=600;
+      var timer = setInterval(function () {
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        var ispeed = Math.floor(-scrollTop / 6);
+        console.log(ispeed)
+        if (scrollTop <= 600) {
+          clearInterval(timer);
+        }
+        document.documentElement.scrollTop = document.body.scrollTop = scrollTop + ispeed;
+      }, 30);
+      jQuery(".detail").show();
+    },
+    getTop5:function(){
+      myAjax({
+        url:sysUrl+'/getTop5',
+        success:function(res){
+          var d = JSON.parse(res);
+          vue.repArticles=d.data;
+          ueditor = UE.getEditor("reply");
+          jQuery(document).on('click','#rep',function(){
+            var data ={
+              repId:lookId,
+              content:ueditor.getContent(),
+              type:1
+            }
+            myAjax({
+              url:sysUrl+"/reply",
+              data:JSON.stringify(data),
+              type:'post',
+              success:function(){
+                // var d = JSON.parse(res);
+                vue.getReplies(lookId);
+              }
+            })
+
+          });
+          for(var i = 0;i<d.data.length;i++){
+            if(i<3){
+              var html ='<div id ="'+i+'" class="tt image col-xs-12 col-sm-4 col-md-4">\n' +
+                '              <div class="index-cat-box" style="background-image:url('+d.data[i].cover+')"><a class="iscat" href="#">\n' +
+                '                <div class="promo-overlay">'+d.data[i].title+'</div>\n' +
+                '                <div class="modulo_line"></div>\n' +
+                '              </a></div>\n' +
+                '            </div>';
+              jQuery(".thumbnail-cat").append(html);
+            }else{
+              var html ='<div id ="'+i+'" class="tt single-item">\n' +
+                '            <div class="image" style="background-image:url('+d.data[i].cover+')"><a href="#">\n' +
+                '              <div class="overlay"></div>\n' +
+                '              <div class="cat"></div>\n' +
+                '              <div class="title">\n' +
+                '                <h3>'+d.data[i].title+'</h3>\n' +
+                '              </div>\n' +
+                '            </a></div>\n' +
+                '          </div>';
+              jQuery(".top-singles").append(html);
+            }
+
+          }
+        }
+      })
+    },
+    getRead:function(){
+      myAjax({
+        url:sysUrl+'/getRead',
+        success:function(res){
+          var d = JSON.parse(res);
+          vue.readArticles=d.data;
+          for(var i = 0;i<d.data.length;i++){
+            var html ='<ul id="'+i+'" class="widget_suxingme_topic">\n' +
+              '              <li><a href="#" title="'+d.data[i].cover+'">\n' +
+              '                <div class="overlay"></div>\n' +
+              '                <div class="image" style="background-image: url('+d.data[i].cover+');"></div>\n' +
+              '                <div class="title">\n' +
+              '                  <h4>'+d.data[i].title+'</h4>\n' +
+              '                  <div class="meta"><span>查看文章</span></div>\n' +
+              '                </div>\n' +
+              '              </a></li>\n' +
+              '            </ul>';
+            jQuery(".rec").append(html);
+          }
+        }
+      })
+    },
+    getNew:function(){
+      myAjax({
+        url:sysUrl+'/getNew',
+        dataType:"json",
+        success:function(res){
+          var d  = JSON.parse(res);
+          console.log(d.data);
+          vue.newArticles = d.data;
+
+          for(var i = 0;i <d.data.length;i++){
+          var html = "";
+            if(i == 0){
+              html+='<li id="'+i+'" class="rr one"><a href="#" title="'+d.data[i].title+'">\n' +
+                '                <div class="overlay"></div>\n' +
+                '                <img class="lazy" src="'+d.data[i].cover+'" alt="'+d.data[i].title+'"/>\n' +
+                '                <div class="title"><span>'+d.data[i].createTime+'</span>\n' +
+                '                  <h4>'+d.data[i].title+'</h4>\n' +
+                '                </div>\n' +
+                '              </a></li>'
+            }
+            else{
+              html+='<li id="'+i+'" class="rr others">\n' +
+                '                <div class="image"><a href="#" title="'+d.data[i].title+'"> ' +
+                '<img class="lazy" src="'+d.data[i].cover+'"\n' +
+                '   alt="'+d.data[i].title+'"/>\n' +
+                '                </a></div>\n' +
+                '                <div class="title">\n' +
+                '                  <h4><a href="#" title="'+d.data[i].title+'">'+d.data[i].title+'</a></h4>\n' +
+                '                  <span style="width: 200px;margin-left: -100px;margin-top: -50px;">'+d.data[i].createTime+'</span></div>\n' +
+                '              </li>'
+            }
+            jQuery(".recent-posts-widget").append(html);
+            console.log(html)
+
+          }
+        }
+      })
+    },
 
     getAll:function(){
+      var _button = jQuery('#fa-loadmore');
+      _button.html('..加载中');
       var data={
         pageIndex:pageIndex,
         pageSize:pageSize
       };
       // console.log(data);
       myAjax({
-        url:'http://118.25.59.30:8080/getArticles',
+        url:sysUrl+'/getArticles',
         type:'post',
         dataType:'json',
         data:JSON.stringify(data),
         success:function(res){
+          var _button = jQuery('#fa-loadmore');
+          _button.html('加载更多');
           pageIndex++;
           var d  = JSON.parse(res);
           vue.articles = d.data;
           console.log(d.data.length);
-          var _self = jQuery(this),
-            _postlistWrap = jQuery('.posts-con'),
-            _button = jQuery('#fa-loadmore'),
-            _data = _self.data();
-          ueditor = UE.getEditor("reply");
+          // var _self = jQuery(this),
+          //   _postlistWrap = jQuery('.posts-con'),
+          //   _button = jQuery('#fa-loadmore'),
+          //   _data = _self.data();
+
           var data = d.data;
           // console.log(data)
 
@@ -862,7 +1016,7 @@ var vue = new Vue({
 
             html+='      <div class="posts-default-box">\n' +
               '        <div class="posts-default-title">\n' +
-              '          <h2><a  title="'+data.title+'" >'+data[i].title+'</a></h2>\n' +
+              '          <h2><a  title="'+data[i].title+'" >'+data[i].title+'</a></h2>\n' +
               '        </div>\n' +
               '        <div class="posts-default-content">\n' +
               '          <div class="posts-text">\n' +
@@ -872,7 +1026,7 @@ var vue = new Vue({
               '              <li class="ico-cat"><i class="icon-list-2"></i> <a href="#">'+data[i].authorName+'</a></li>\n' +
               '              <li class="ico-time"><i class="icon-clock-1"></i> '+data[i].createTime+'</li>\n' +
               '              <li class="ico-eye hidden-xs"><i class="icon-eye-4"></i> '+data[i].read+'</li>\n' +
-              '              <li class="ico-like hidden-xs"><i class="icon-heart"></i>'+data[i].like+'</li>\n' +
+              '              ' +
               '            </ul>\n' +
               '          </div>\n' +
               '        </div>\n' +
@@ -893,7 +1047,10 @@ var vue = new Vue({
   },
   created: function (){
     this.init();
+
   }
 
 });
+
+
 

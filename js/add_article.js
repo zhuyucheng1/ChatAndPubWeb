@@ -1,6 +1,8 @@
 // var editor = UE.getEditor("eleContentAdd");
 var ue = "";
-var sys = "http://118.25.59.30:8080/"
+// var sys = "http://localhost:8080";
+// var sysUrl = "http://118.25.59.30:8080";
+var sys = "http://118.25.59.30:8080/";
 var vue = new Vue({
   el: '#app',
   data: {

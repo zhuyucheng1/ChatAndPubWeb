@@ -20,6 +20,8 @@
 <script>
 var regAccount = "";
 var regPassword = "";
+// var sysUrl = "http://localhost:8080";
+var sysUrl = "http://118.25.59.30:8080";
 	(function() {
 		// trim polyfill : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim
 		if (!String.prototype.trim) {
@@ -149,7 +151,7 @@ var regPassword = "";
 			return false;
 		}else{//登录
       $.ajax({
-        url:"http://118.25.59.30:8080/login",
+        url:sysUrl+"/login",
         type:'post',
         data:JSON.stringify(data),
         dataType: 'json',
@@ -290,7 +292,7 @@ var regPassword = "";
 			return false;
 		}else{//注册
 			$.ajax({
-        url:"http://118.25.59.30:8080/reg",
+        url:sysUrl+"/reg",
         type:'post',
         data:JSON.stringify(data),
         dataType: 'json',
